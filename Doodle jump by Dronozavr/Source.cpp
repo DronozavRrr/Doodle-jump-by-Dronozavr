@@ -690,17 +690,15 @@ void game(SDL_Renderer*& renderer, int& IsSound, int& IsMusic)
 		rulesfornicname = get_text_texture_records(renderer, Rules, my_font);
 		SDL_Rect forRules = { 0,textRect.y,200,textRect.h };
 		SDL_RenderCopy(renderer, rulesfornicname, NULL, &forRules);
-		// Отображение текста на экране
+
 		SDL_RenderCopy(renderer, TextureNickname, NULL, &textRect);
 		SDL_RenderPresent(renderer);
 
-		// Освобождение ресурсов
+
 		SDL_FreeSurface(SurfaceForNickname);
 		SDL_DestroyTexture(TextureNickname);
 		SDL_DestroyTexture(rulesfornicname);
 	}
-
-	// Выход из режима ввода текста
 	SDL_StopTextInput();
 
 	quit = false;
