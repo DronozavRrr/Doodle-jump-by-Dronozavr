@@ -1,5 +1,8 @@
 #define _CRT_SECURE_NO_WARNINGS
 
+#define getrandom(min, max) \
+    ((rand()%(int32_t)(((max) + 1)-(min)))+ (min))  // включает значения
+
 #include "SDL.h"
 #include "stdlib.h"
 #include "SDL_ttf.h"
@@ -23,8 +26,73 @@ struct Record {
 	char name[20];
 };
 
+typedef enum type_platform
+{
+	GREEN,
+	BROKEN,
+	DARK_BLUE,
+	BLUE,
+	WHITE
+}platform_t;
+
+struct Platforma
+{
+	SDL_Texture* TexturePlat;
+	SDL_Rect RectPlat;
+	platform_t type;
+};
+
 bool operator<(const Record& lhs, const Record& rhs) {
 	return lhs.score > rhs.score;
+}
+
+void SetUpPlat(SDL_Renderer*& renderer,Platforma& pl)
+{
+	switch (pl.type)
+	{
+	case GREEN:
+	{
+		SDL_Surface* GreenPlatform = IMG_Load("GreenPlatform.bmp");
+		SDL_SetColorKey(GreenPlatform, SDL_TRUE, SDL_MapRGB(GreenPlatform->format, 255, 255, 255));
+		pl.TexturePlat = SDL_CreateTextureFromSurface(renderer, GreenPlatform);
+		SDL_FreeSurface(GreenPlatform);
+	}break;
+	case BROKEN:
+	{
+		SDL_Surface* BrokenPlatform = IMG_Load("BrokenPlatform.bmp");
+		SDL_SetColorKey(BrokenPlatform, SDL_TRUE, SDL_MapRGB(BrokenPlatform->format, 255, 255, 255));
+		pl.TexturePlat = SDL_CreateTextureFromSurface(renderer, BrokenPlatform);
+		SDL_FreeSurface(BrokenPlatform);
+	}
+		break;
+	case DARK_BLUE:
+	{
+		SDL_Surface* DarkBluePlatform = IMG_Load("DarkBluePlatform.bmp");
+		SDL_SetColorKey(DarkBluePlatform, SDL_TRUE, SDL_MapRGB(DarkBluePlatform->format, 255, 255, 255));
+		pl.TexturePlat = SDL_CreateTextureFromSurface(renderer, DarkBluePlatform);
+		SDL_FreeSurface(DarkBluePlatform);
+	}
+		break;
+	case BLUE:
+	{
+		SDL_Surface* BluePlatform = IMG_Load("BluePlatform.bmp");
+		SDL_SetColorKey(BluePlatform, SDL_TRUE, SDL_MapRGB(BluePlatform->format, 255, 255, 255));
+		pl.TexturePlat = SDL_CreateTextureFromSurface(renderer, BluePlatform);
+		SDL_FreeSurface(BluePlatform);
+	}
+		break;
+	case WHITE:
+	{
+		SDL_Surface* WhitePlatform = IMG_Load("WhitePlatform.bmp");
+		SDL_SetColorKey(WhitePlatform, SDL_TRUE, SDL_MapRGB(WhitePlatform->format, 255, 255, 255));
+		pl.TexturePlat = SDL_CreateTextureFromSurface(renderer, WhitePlatform);
+		SDL_FreeSurface(WhitePlatform);
+	}
+		break;
+	default:
+		break;
+	}
+
 }
 
 
@@ -99,7 +167,7 @@ void draw_text_records5(SDL_Renderer*& renderer, SDL_Texture* texture)
 }
 
 
-void init_platforms(SDL_Rect platforms[], int count)
+void init_platforms(SDL_Renderer*&renderer,Platforma* platforms, int count)
 {
 	srand(time(NULL));
 	int c = 0;
@@ -108,33 +176,34 @@ void init_platforms(SDL_Rect platforms[], int count)
 		 int a = rand() % (800 - 90);
 		int b = rand() % ((600 - 30) - c);
 
-		platforms[i] = { a,b,90,15 };
+		platforms[i].RectPlat = { a,b,90,15 };
+		platforms[i].type = GREEN;
+		SetUpPlat(renderer, platforms[i]);
 		c -= 50;
 	}
 }
 
 
-void draw_platforms(SDL_Renderer*& renderer, SDL_Rect platforms[], int count, SDL_Texture* texture[], SDL_Surface* GreenPlatform)
+void draw_platforms(SDL_Renderer*& renderer, Platforma platforms[], int count)
 {
 	for (int i = 0; i < count; i++)
 	{
-		if (platforms[i].w == 0) continue;
-		texture[i] = SDL_CreateTextureFromSurface(renderer, GreenPlatform);
-		SDL_RenderCopy(renderer, texture[i], NULL, &platforms[i]);
-		SDL_DestroyTexture(texture[i]);
+		if (platforms[i].RectPlat.w == 0) continue;
+		SDL_RenderCopy(renderer, platforms[i].TexturePlat, NULL, &platforms[i].RectPlat);
 	}
 }
 
-bool is_intersection_platform(SDL_Rect rect1,SDL_Rect* platforms,int n)
+bool is_intersection_platform(SDL_Rect rect1,Platforma* platforms,int n)
 {
 	for (int i = 0; i < n; ++i)
 	{
-		if (rect1.x != platforms[i].x && rect1.y != platforms[i].y)
+		SDL_Rect& rect = platforms[i].RectPlat;
+		if (rect1.x != rect.x && rect1.y != rect.y)
 		{
-			if (rect1.x < platforms[i].x + platforms[i].w &&
-				rect1.x + rect1.w > platforms[i].x &&
-				rect1.y < platforms[i].y + platforms[i].h &&
-				rect1.y + rect1.h > platforms[i].y)
+			if (rect1.x < rect.x + rect.w &&
+				rect1.x + rect1.w > rect.x &&
+				rect1.y < rect.y + rect.h &&
+				rect1.y + rect1.h >rect.y)
 			{
 				return true;
 			}
@@ -619,17 +688,11 @@ void game(SDL_Renderer*& renderer, int& IsSound, int& IsMusic)
 	SDL_Texture* TextureBallForAttack = SDL_CreateTextureFromSurface(renderer, BallForAttack);
 	SDL_FreeSurface(BallForAttack);
 
-	SDL_Surface* BrokenPlatform = IMG_Load("BrokenPlatform.bmp");
-	SDL_SetColorKey(BrokenPlatform, SDL_TRUE, SDL_MapRGB(BrokenPlatform->format, 255, 255, 255));
-	SDL_Texture* TextureBrokenPlatform = SDL_CreateTextureFromSurface(renderer, BrokenPlatform);
-	SDL_FreeSurface(BrokenPlatform);
-
-	SDL_Surface* GreenPlatform = IMG_Load("GreenPlatform.bmp");
-	SDL_SetColorKey(GreenPlatform, SDL_TRUE, SDL_MapRGB(GreenPlatform->format, 255, 255, 255));
+	
 	int n = 10;
-	SDL_Texture** TextureGreenPlatform = (SDL_Texture**)malloc(sizeof(SDL_Texture*) * n);
-	SDL_Rect* platforms = (SDL_Rect*)malloc(sizeof(SDL_Rect) * n);
-	init_platforms(platforms, 10);
+	Platforma* platforms = (Platforma*)malloc(sizeof(Platforma) * n);
+	
+	init_platforms(renderer,platforms, 10);
 
 	SDL_Rect PointDoodle;
 	SDL_Rect RectBallAttack;
@@ -754,7 +817,7 @@ void game(SDL_Renderer*& renderer, int& IsSound, int& IsMusic)
 		y += dy;
 		if (m == 0)
 		{
-			PointDoodle = { platforms[1].x, platforms[1].y, 80, 80 }; m++;
+			PointDoodle = { platforms[1].RectPlat.x, platforms[1].RectPlat.y, 80, 80 }; m++;
 		}
 		if (y > 580)
 		{
@@ -771,35 +834,40 @@ void game(SDL_Renderer*& renderer, int& IsSound, int& IsMusic)
 			for (int i = 0; i < 10; ++i)
 			{
 				y = h;
-				platforms[i].y = platforms[i].y - dy;
+				platforms[i].RectPlat.y = platforms[i].RectPlat.y - dy;
 
-				if (platforms[i].y > 533)
+				if (platforms[i].RectPlat.y > 533)
 				{
 					do
 					{
-						platforms[i].y = rand() % (50);
-						platforms[i].x = rand() % 800 - 90;
-					} while (is_intersection_platform(platforms[i], platforms, n));
+						int RandDiv = getrandom(2,9);
+						if (i % RandDiv == 0)
+						{
+							RandDiv = getrandom(0, WHITE);
+							platforms[i].type = platform_t( getrandom(0, WHITE));
+							SetUpPlat(renderer, platforms[i]);
+
+						}
+						platforms[i].RectPlat.y = rand() % (50);
+						platforms[i].RectPlat.x = rand() % 800 - 90;
+					} while (is_intersection_platform(platforms[i].RectPlat, platforms, n));
 				}
 			}
 		}
 
-		if ( Monster % 5 == 0)
-		{
-
-		}
+		
 		
 
 		for (int i = 0; i < 10; i++)
 		{
-			if (is_colliding(PointDoodle, platforms[i]) && dy > 0)
+			if (is_colliding(PointDoodle, platforms[i].RectPlat) && dy > 0)
 			{
-				if (temp != platforms[i].y && b != i)
+				if (temp != platforms[i].RectPlat.y && b != i)
 				{
 
 					isjump = true;
 					b = i;
-					temp = platforms[i].y;
+					temp = platforms[i].RectPlat.y;
 					k++;
 				}
 				
@@ -822,7 +890,7 @@ void game(SDL_Renderer*& renderer, int& IsSound, int& IsMusic)
 		SDL_RenderCopy(renderer, TextureForFon, NULL, &FullScreen);
 		SDL_RenderCopy(renderer, TextureSky, NULL, &RectForSky);
 		SDL_RenderCopy(renderer, TextureButtonPause, NULL, &RectForButtonPause);
-		draw_platforms(renderer, platforms, 10, TextureGreenPlatform, GreenPlatform);
+		draw_platforms(renderer, platforms, 10);
 		if (side)
 		{
 			if (isattack)
@@ -848,7 +916,7 @@ void game(SDL_Renderer*& renderer, int& IsSound, int& IsMusic)
 					RectBallAttack.h = 20;
 					RectBallAttack.x = PointDoodle.x + 20;
 					SDL_RenderCopy(renderer, TextureBallForAttack, NULL, &RectBallAttack);
-					draw_platforms(renderer, platforms, 10, TextureGreenPlatform, GreenPlatform);
+					draw_platforms(renderer, platforms, 10);
 					Score = get_text_texture(renderer, text, my_font);
 					draw_text(renderer, Score);
 					SDL_DestroyTexture(Score);
@@ -898,7 +966,7 @@ void game(SDL_Renderer*& renderer, int& IsSound, int& IsMusic)
 					RectBallAttack.h = 20;
 					RectBallAttack.x = PointDoodle.x + 20;
 					SDL_RenderCopy(renderer, TextureBallForAttack, NULL, &RectBallAttack);
-					draw_platforms(renderer, platforms, 10, TextureGreenPlatform, GreenPlatform);
+					draw_platforms(renderer, platforms, 10);
 					Score = get_text_texture(renderer, text, my_font);
 					draw_text(renderer, Score);
 					SDL_DestroyTexture(Score);
