@@ -446,10 +446,6 @@ void SettingsMenu(SDL_Renderer*& renderer, int& IsSound, int& IsMusic)
 
 	while (!quit)
 	{
-
-
-
-
 		SDL_GetMouseState(&nowx, &nowy);
 		SDL_Rect nowmouse = { nowx,nowy,2,2 };
 		while (SDL_PollEvent(&event))
@@ -1083,7 +1079,7 @@ void game(SDL_Renderer*& renderer, int& IsSound, int& IsMusic)
 					{
 						isjetpack = true;
 						isjump = true;
-						jump_speed = -220;
+						jump_speed = -110;
 						b = i;
 						temp = platforms[i].RectPlat.y;
 						k += 30;
