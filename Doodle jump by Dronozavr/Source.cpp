@@ -44,6 +44,8 @@ struct Platforma
 	SDL_Texture* TexturePlat;
 	SDL_Rect RectPlat;
 	platform_t type;
+	int BlueDistY = 0;
+	int PlatformD = -1;
 };
 
 bool operator<(const Record& lhs, const Record& rhs) {
@@ -212,6 +214,8 @@ void init_platforms(SDL_Renderer*&renderer,Platforma* platforms, int count)
 		int b = rand() % ((600 - 30) - c);
 		platforms[i].RectPlat = { a,b,90,15 };
 		platforms[i].type = GREEN;
+		platforms[i].BlueDistY = 0;
+		platforms[i].PlatformD = -1;
 		SetUpPlat(renderer, platforms[i]);
 		c -= 50;
 	}
@@ -738,7 +742,7 @@ void game(SDL_Renderer*& renderer, int& IsSound, int& IsMusic)
 	SDL_FreeSurface(BallForAttack);
 
 	
-	int n = 12;
+	int n = 15;
 	Platforma* platforms = (Platforma*)malloc(sizeof(Platforma) * n);
 	
 	init_platforms(renderer,platforms, n);
@@ -825,7 +829,7 @@ void game(SDL_Renderer*& renderer, int& IsSound, int& IsMusic)
 	int m = 0;
 
 	int SpeedForPlatform = 1;
-
+	int tmpBluePlatformY  = 0;
 	int temp = 0;
 	int b = NULL;
 	int tmpforblue = 0;
@@ -926,7 +930,7 @@ void game(SDL_Renderer*& renderer, int& IsSound, int& IsMusic)
 									SetUpPlat(renderer, platforms[i]);
 									do
 									{
-										platforms[i].RectPlat.y = getrandom(10, 60);
+										platforms[i].RectPlat.y = getrandom(41, 60);
 										platforms[i].RectPlat.x = getrandom(90, 720);
 										platforms[i].RectPlat.w = 90;
 										platforms[i].RectPlat.h = 30;
@@ -940,7 +944,7 @@ void game(SDL_Renderer*& renderer, int& IsSound, int& IsMusic)
 										SetUpPlat(renderer, platforms[i]);
 										do
 										{
-											platforms[i].RectPlat.y = getrandom(10, 60);
+											platforms[i].RectPlat.y = getrandom(41, 60);
 											platforms[i].RectPlat.x = getrandom(90, 720);
 											platforms[i].RectPlat.w = 90;
 											platforms[i].RectPlat.h = 30;
@@ -956,7 +960,7 @@ void game(SDL_Renderer*& renderer, int& IsSound, int& IsMusic)
 											SetUpPlat(renderer, platforms[i]);
 											do
 											{
-												platforms[i].RectPlat.y = getrandom(10, 60);
+												platforms[i].RectPlat.y = getrandom(41, 60);
 												platforms[i].RectPlat.x = getrandom(90, 720);
 												platforms[i].RectPlat.w = 90;
 												platforms[i].RectPlat.h = 30;
@@ -975,7 +979,7 @@ void game(SDL_Renderer*& renderer, int& IsSound, int& IsMusic)
 
 											do
 											{
-												platforms[i].RectPlat.y = getrandom(10, 60);
+												platforms[i].RectPlat.y = getrandom(41, 60);
 												platforms[i].RectPlat.x = getrandom(90, 720);
 												platforms[i].RectPlat.w = 90;
 												platforms[i].RectPlat.h = 15;
@@ -998,15 +1002,14 @@ void game(SDL_Renderer*& renderer, int& IsSound, int& IsMusic)
 					{
 						
 						 int platformY = platforms[i].RectPlat.y;
-						 platformY += platformDirection1 * platformOffset;
-						 
+						 platformY += platforms[i].PlatformD * int(platformOffset);
+						 platforms[i].BlueDistY++;
 						 platforms[i].RectPlat.y = platformY;
-						 if ((platforms[i].RectPlat.y > 500 ) || (platforms[i].RectPlat.y < 100) )
+						 if (platforms[i].BlueDistY > 70)
 						 {
-							 
-							 platformDirection1 *= -1;
+							 platforms[i].BlueDistY = 0;
+							 platforms[i].PlatformD *= -1;
 						 }
-						 
 
 						 
 					}
