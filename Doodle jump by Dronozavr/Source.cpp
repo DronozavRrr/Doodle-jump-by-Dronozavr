@@ -35,7 +35,8 @@ typedef enum type_platform
 	WHITE, // 4
 	GreenWithJump,
 	GreenWithJetpack, // 6
-	Monster1
+	Monster1,
+	GreenWithShapka //8
 }platform_t;
 
 struct Platforma
@@ -116,6 +117,13 @@ void SetUpPlat(SDL_Renderer*& renderer,Platforma& pl)
 		SDL_FreeSurface(Monster1);
 	}
 	break;
+	case GreenWithShapka:
+	{
+		SDL_Surface* Shapka = IMG_Load("Shapka.bmp");
+		SDL_SetColorKey(Shapka, SDL_TRUE, SDL_MapRGB(Shapka->format, 255, 255, 255));
+		pl.TexturePlat = SDL_CreateTextureFromSurface(renderer, Shapka);
+		SDL_FreeSurface(Shapka);
+	}break;
 	default:
 		break;
 	}
@@ -703,7 +711,26 @@ void game(SDL_Renderer*& renderer, int& IsSound, int& IsMusic)
 	SDL_Texture* TextureDoodleAttack = SDL_CreateTextureFromSurface(renderer, DoodleAttack);
 	SDL_FreeSurface(DoodleAttack);
 
+	SDL_Surface* DoodleLookRightWithJetpack = IMG_Load("DoodleLookRightWithJackpack.bmp");
+	SDL_SetColorKey(DoodleLookRightWithJetpack, SDL_TRUE, SDL_MapRGB(DoodleLookRightWithJetpack->format, 255, 255, 255));
+	SDL_Texture* TextureDoodleLookRightWithJetpack = SDL_CreateTextureFromSurface(renderer, DoodleLookRightWithJetpack);
+	SDL_FreeSurface(DoodleLookRightWithJetpack);
 
+	SDL_Surface* DoodleLookLeftWithJetpack = IMG_Load("DoodleLookLeftWithJackpack.bmp");
+	SDL_SetColorKey(DoodleLookLeftWithJetpack, SDL_TRUE, SDL_MapRGB(DoodleLookLeftWithJetpack->format, 255, 255, 255));
+	SDL_Texture* TextureDoodleLookLeftWithJetpack = SDL_CreateTextureFromSurface(renderer, DoodleLookLeftWithJetpack);
+	SDL_FreeSurface(DoodleLookLeftWithJetpack);
+
+
+	SDL_Surface* DoodleLookLeftWithShapka = IMG_Load("DoodleLookLeftWithShapka.bmp");
+	SDL_SetColorKey(DoodleLookLeftWithShapka, SDL_TRUE, SDL_MapRGB(DoodleLookLeftWithShapka->format, 255, 255, 255));
+	SDL_Texture* TextureDoodleLookLeftWithShapka = SDL_CreateTextureFromSurface(renderer, DoodleLookLeftWithShapka);
+	SDL_FreeSurface(DoodleLookLeftWithShapka);
+
+	SDL_Surface* DoodleLookRightWithShapka = IMG_Load("DoodleLookRightWithShapka.bmp");
+	SDL_SetColorKey(DoodleLookRightWithShapka, SDL_TRUE, SDL_MapRGB(DoodleLookRightWithShapka->format, 255, 255, 255));
+	SDL_Texture* TextureDoodleLookRightWithShapka = SDL_CreateTextureFromSurface(renderer, DoodleLookRightWithShapka);
+	SDL_FreeSurface(DoodleLookRightWithShapka);
 
 	SDL_Surface* BallForAttack = IMG_Load("BallForAttack.bmp");
 	SDL_SetColorKey(BallForAttack, SDL_TRUE, SDL_MapRGB(BallForAttack->format, 255, 255, 255));
@@ -803,6 +830,7 @@ void game(SDL_Renderer*& renderer, int& IsSound, int& IsMusic)
 	int b = NULL;
 	int tmpforblue = 0;
 	int tmpy = 0;
+	int isshapka = 0;
 	int isjetpack = 0;
 	int tmpfordarkblue = 0;
 	int tmpyfordarkblue = 0;
@@ -873,30 +901,42 @@ void game(SDL_Renderer*& renderer, int& IsSound, int& IsMusic)
 				{
 					
 						int IsBonus = getrandom(0, 100);
-						int IsMonster = getrandom(0, 100);
 						
 						
 							cout << "IsBonus" << IsBonus<< endl;
 
-							if (IsBonus <= 2)
+							if (IsBonus == 0)
 							{
-								platforms[i].type = platform_t(GreenWithJump);
+								platforms[i].type = platform_t(Monster1);
 								SetUpPlat(renderer, platforms[i]);
 								do
 								{
-									platforms[i].RectPlat.y = getrandom(10, 60);
-									platforms[i].RectPlat.x = getrandom(90, 720);
-									platforms[i].RectPlat.w = 90;
-									platforms[i].RectPlat.h = 30;
+									platforms[i].RectPlat.y = 0;
+									platforms[i].RectPlat.x = getrandom(200,500 );
+									platforms[i].RectPlat.w = 180;
+									platforms[i].RectPlat.h = 60;
 								} while (is_intersection_platform(platforms[i].RectPlat, platforms, n));
-									
+
 							}
 							else
 							{
-	
-									if(IsBonus == 3)
+								if (IsBonus == 1)
+								{
+									platforms[i].type = platform_t(GreenWithShapka);
+									SetUpPlat(renderer, platforms[i]);
+									do
 									{
-										platforms[i].type = platform_t(GreenWithJetpack);
+										platforms[i].RectPlat.y = getrandom(10, 60);
+										platforms[i].RectPlat.x = getrandom(90, 720);
+										platforms[i].RectPlat.w = 90;
+										platforms[i].RectPlat.h = 30;
+									} while (is_intersection_platform(platforms[i].RectPlat, platforms, n));
+								}
+								else
+								{
+									if (IsBonus == 2)
+									{
+										platforms[i].type = platform_t(GreenWithJump);
 										SetUpPlat(renderer, platforms[i]);
 										do
 										{
@@ -905,18 +945,34 @@ void game(SDL_Renderer*& renderer, int& IsSound, int& IsMusic)
 											platforms[i].RectPlat.w = 90;
 											platforms[i].RectPlat.h = 30;
 										} while (is_intersection_platform(platforms[i].RectPlat, platforms, n));
-										
+
 									}
-									if(IsBonus >= 4)
+									else
 									{
-							
+
+										if (IsBonus == 3)
+										{
+											platforms[i].type = platform_t(GreenWithJetpack);
+											SetUpPlat(renderer, platforms[i]);
+											do
+											{
+												platforms[i].RectPlat.y = getrandom(10, 60);
+												platforms[i].RectPlat.x = getrandom(90, 720);
+												platforms[i].RectPlat.w = 90;
+												platforms[i].RectPlat.h = 30;
+											} while (is_intersection_platform(platforms[i].RectPlat, platforms, n));
+
+										}
+										if (IsBonus >= 4)
+										{
+
 											int RandDiv = getrandom(2, 9);
-											
-												
-												RandDiv = getrandom(0, WHITE);
-												platforms[i].type = platform_t(getrandom(0, WHITE));
-												SetUpPlat(renderer, platforms[i]);
-											
+
+
+											RandDiv = getrandom(0, WHITE);
+											platforms[i].type = platform_t(getrandom(0, WHITE));
+											SetUpPlat(renderer, platforms[i]);
+
 											do
 											{
 												platforms[i].RectPlat.y = getrandom(10, 60);
@@ -924,8 +980,10 @@ void game(SDL_Renderer*& renderer, int& IsSound, int& IsMusic)
 												platforms[i].RectPlat.w = 90;
 												platforms[i].RectPlat.h = 15;
 											} while (is_intersection_platform(platforms[i].RectPlat, platforms, n));
+										}
+
 									}
-								
+								}
 							}
 						
 					
@@ -939,15 +997,17 @@ void game(SDL_Renderer*& renderer, int& IsSound, int& IsMusic)
 					if (platforms[i].type == BLUE)
 					{
 						
-						int platformY = platforms[i].RectPlat.y;
+						 int platformY = platforms[i].RectPlat.y;
 						 platformY += platformDirection1 * platformOffset;
-
+						 
 						 platforms[i].RectPlat.y = platformY;
-						 if ((platforms[i].RectPlat.y < 50) || (platforms[i].RectPlat.y > 500) )
+						 if ((platforms[i].RectPlat.y > 500 ) || (platforms[i].RectPlat.y < 100) )
 						 {
 							 
 							 platformDirection1 *= -1;
 						 }
+						 
+
 						 
 					}
 				}
@@ -985,6 +1045,22 @@ void game(SDL_Renderer*& renderer, int& IsSound, int& IsMusic)
 					{
 						platforms[i].RectPlat = { 0 , 0 ,0 ,0 };
 					}
+
+		
+					if (platforms[i].type == GreenWithShapka)
+					{
+						isshapka = true;
+						isjump = true;
+						jump_speed = -100;
+						b = i;
+						temp = platforms[i].RectPlat.y;
+						k+=13;
+						if (IsSound % 2 == 0)
+						{
+							Mix_Chunk* fireMusic = Mix_LoadWAV("MusicForShapka.wav");
+							Mix_PlayChannel(-1, fireMusic, 0);
+						}
+					}
 					if (platforms[i].type == GreenWithJump)
 					{
 						isjump = true;
@@ -996,9 +1072,11 @@ void game(SDL_Renderer*& renderer, int& IsSound, int& IsMusic)
 						{
 							Mix_Chunk* fireMusic = Mix_LoadWAV("MusicForSpring.wav");
 							Mix_PlayChannel(-1, fireMusic, 0);
+							while (Mix_Playing(-1)) {
+								// Выводим "ccc"
+								printf("ccc\n");
+							}
 						}
-						
-
 					}
 
 					if (platforms[i].type == GreenWithJetpack)
@@ -1013,8 +1091,8 @@ void game(SDL_Renderer*& renderer, int& IsSound, int& IsMusic)
 						{
 							Mix_Chunk* fireMusic = Mix_LoadWAV("MusicForJetpack.wav");
 							Mix_PlayChannel(-1, fireMusic, 0);
-						}
 
+						}
 
 					}
 					if(platforms[i].type == GREEN || platforms[i].type == DARK_BLUE || platforms[i].type == BLUE)
@@ -1026,6 +1104,19 @@ void game(SDL_Renderer*& renderer, int& IsSound, int& IsMusic)
 						
 					}
 
+					if (platforms[i].type == Monster1)
+					{
+
+							if (IsSound % 2 == 0)
+							{
+								Mix_Chunk* fireMusic = Mix_LoadWAV("MusicForDie.wav");
+								Mix_PlayChannel(-1, fireMusic, 0);
+							}
+							return;
+						
+
+					}
+
 					if (platforms[i].type == WHITE)
 					{
 						isjump = true;
@@ -1034,7 +1125,7 @@ void game(SDL_Renderer*& renderer, int& IsSound, int& IsMusic)
 						
 					}
 				}
-				if(platforms[i].type == GreenWithJetpack|| platforms[i].type == GreenWithJump || platforms[i].type == GREEN || platforms[i].type == WHITE || platforms[i].type == DARK_BLUE|| platforms[i].type == BLUE) dy = jump_speed;
+				if(platforms[i].type == GreenWithShapka || platforms[i].type == GreenWithJetpack|| platforms[i].type == GreenWithJump || platforms[i].type == GREEN || platforms[i].type == WHITE || platforms[i].type == DARK_BLUE|| platforms[i].type == BLUE) dy = jump_speed;
 				
 				SDL_Delay(3);
 				
@@ -1083,6 +1174,16 @@ void game(SDL_Renderer*& renderer, int& IsSound, int& IsMusic)
 					RectBallAttack.x = PointDoodle.x + 20;
 					SDL_RenderCopy(renderer, TextureBallForAttack, NULL, &RectBallAttack);
 					draw_platforms(renderer, platforms, n);
+					for (int i = 0; i < n; i++)
+					{
+						if (platforms[i].type == Monster1 && SDL_HasIntersection(&RectBallAttack,&platforms[i].RectPlat))
+						{
+
+							platforms[i].RectPlat = { 0 , 0 ,0 ,0 };
+							k += 3;
+
+						}
+					}
 					Score = get_text_texture(renderer, text, my_font);
 					draw_text(renderer, Score);
 					SDL_DestroyTexture(Score);
@@ -1135,6 +1236,16 @@ void game(SDL_Renderer*& renderer, int& IsSound, int& IsMusic)
 					RectBallAttack.x = PointDoodle.x + 20;
 					SDL_RenderCopy(renderer, TextureBallForAttack, NULL, &RectBallAttack);
 					draw_platforms(renderer, platforms, n);
+					for (int i = 0; i < n; i++)
+					{
+						if (platforms[i].type == Monster1 && SDL_HasIntersection(&RectBallAttack, &platforms[i].RectPlat))
+						{
+
+							platforms[i].RectPlat = { 0 , 0 ,0 ,0 };
+							k += 3;
+
+						}
+					}
 					Score = get_text_texture(renderer, text, my_font);
 					draw_text(renderer, Score);
 					SDL_DestroyTexture(Score);
@@ -1151,6 +1262,7 @@ void game(SDL_Renderer*& renderer, int& IsSound, int& IsMusic)
 				{
 					SDL_RenderCopy(renderer, TextureDoodleLeftInJump, NULL, &PointDoodle);
 					SDL_RenderPresent(renderer);
+					SDL_Delay(50);
 				}
 				else {
 
@@ -1162,12 +1274,33 @@ void game(SDL_Renderer*& renderer, int& IsSound, int& IsMusic)
 
 		}
 
+		if (Mix_Playing(-1) && isjetpack && !side)
+		{
+			SDL_RenderCopy(renderer, TextureDoodleLookLeftWithJetpack, NULL, &PointDoodle);
+		}
+		if (Mix_Playing(-1) && isjetpack && side)
+		{
+			SDL_RenderCopy(renderer, TextureDoodleLookRightWithJetpack, NULL, &PointDoodle);
+		}
+
+
+		if (Mix_Playing(-1) && isshapka && !side)
+		{
+			SDL_RenderCopy(renderer, TextureDoodleLookLeftWithShapka, NULL, &PointDoodle);
+		}
+		if (Mix_Playing(-1) && isshapka && side)
+		{
+			SDL_RenderCopy(renderer, TextureDoodleLookRightWithShapka, NULL, &PointDoodle);
+		}
+	
+
+
 		_itoa_s(k, text, 10);
 		Score = get_text_texture(renderer, text, my_font);
 		draw_text(renderer, Score);
 		SDL_DestroyTexture(Score);
 		SDL_RenderPresent(renderer);
-		SDL_Delay(10);
+		SDL_Delay(15);
 		SDL_RenderClear(renderer);
 	}
 	FILE* records_read_file = fopen("records.txt", "r");
