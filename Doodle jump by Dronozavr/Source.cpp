@@ -28,11 +28,14 @@ struct Record {
 
 typedef enum type_platform
 {
-	GREEN,
+	GREEN,//0
 	BROKEN,
-	DARK_BLUE,
+	DARK_BLUE, //2
 	BLUE,
-	WHITE
+	WHITE, // 4
+	GreenWithJump,
+	GreenWithJetpack, // 6
+	Monster1
 }platform_t;
 
 struct Platforma
@@ -89,6 +92,30 @@ void SetUpPlat(SDL_Renderer*& renderer,Platforma& pl)
 		SDL_FreeSurface(WhitePlatform);
 	}
 		break;
+	case GreenWithJump:
+	{
+		SDL_Surface* Spring = IMG_Load("Spring.bmp");
+		SDL_SetColorKey(Spring, SDL_TRUE, SDL_MapRGB(Spring->format, 255, 255, 255));
+		pl.TexturePlat = SDL_CreateTextureFromSurface(renderer, Spring);
+		SDL_FreeSurface(Spring);
+	}
+	break;
+	case GreenWithJetpack:
+	{
+		SDL_Surface* JackPack = IMG_Load("JackPack.bmp");
+		SDL_SetColorKey(JackPack, SDL_TRUE, SDL_MapRGB(JackPack->format, 255, 255, 255));
+		pl.TexturePlat = SDL_CreateTextureFromSurface(renderer, JackPack);
+		SDL_FreeSurface(JackPack);
+	}
+	break;
+	case Monster1:
+	{
+		SDL_Surface* Monster1 = IMG_Load("Monster1.bmp");
+		SDL_SetColorKey(Monster1, SDL_TRUE, SDL_MapRGB(Monster1->format, 255, 255, 255));
+		pl.TexturePlat = SDL_CreateTextureFromSurface(renderer, Monster1);
+		SDL_FreeSurface(Monster1);
+	}
+	break;
 	default:
 		break;
 	}
@@ -175,7 +202,6 @@ void init_platforms(SDL_Renderer*&renderer,Platforma* platforms, int count)
 	{
 		 int a = rand() % (800 - 90);
 		int b = rand() % ((600 - 30) - c);
-
 		platforms[i].RectPlat = { a,b,90,15 };
 		platforms[i].type = GREEN;
 		SetUpPlat(renderer, platforms[i]);
@@ -678,10 +704,6 @@ void game(SDL_Renderer*& renderer, int& IsSound, int& IsMusic)
 	SDL_FreeSurface(DoodleAttack);
 
 
-	SDL_Surface* Monster1 = IMG_Load("Monster1.bmp");
-	SDL_SetColorKey(Monster1, SDL_TRUE, SDL_MapRGB(Monster1->format, 255, 255, 255));
-	SDL_Texture* TextureMonster1 = SDL_CreateTextureFromSurface(renderer, Monster1);
-	SDL_FreeSurface(Monster1);
 
 	SDL_Surface* BallForAttack = IMG_Load("BallForAttack.bmp");
 	SDL_SetColorKey(BallForAttack, SDL_TRUE, SDL_MapRGB(BallForAttack->format, 255, 255, 255));
@@ -689,10 +711,10 @@ void game(SDL_Renderer*& renderer, int& IsSound, int& IsMusic)
 	SDL_FreeSurface(BallForAttack);
 
 	
-	int n = 10;
+	int n = 12;
 	Platforma* platforms = (Platforma*)malloc(sizeof(Platforma) * n);
 	
-	init_platforms(renderer,platforms, 10);
+	init_platforms(renderer,platforms, n);
 
 	SDL_Rect PointDoodle;
 	SDL_Rect RectBallAttack;
@@ -765,7 +787,7 @@ void game(SDL_Renderer*& renderer, int& IsSound, int& IsMusic)
 	SDL_StopTextInput();
 
 	quit = false;
-	float jump_speed = -19.0;
+	
 	int x = 400; int y = 50; int h = 100;
 	float dy = 0, dx = 0;
 	bool side = false;
@@ -774,13 +796,24 @@ void game(SDL_Renderer*& renderer, int& IsSound, int& IsMusic)
 	int Ruletka = 10;
 	int Monster = 10;
 	int m = 0;
+
+	int SpeedForPlatform = 1;
+
 	int temp = 0;
 	int b = NULL;
+	int tmpforblue = 0;
+	int tmpy = 0;
+	int isjetpack = 0;
+	int tmpfordarkblue = 0;
+	int tmpyfordarkblue = 0;
 	int nowx, nowy;
+	int platformDirection1 = -1;
+	int platformDirection2 = -1;
+	double platformOffset = 1;
 	while (!quit)
 	{
-
-		Monster = rand() % 100;
+		float jump_speed = -20.0;
+		
 		bool isjump = false;
 		bool isattack = false;
 		SDL_GetMouseState(&nowx, &nowy);
@@ -819,7 +852,7 @@ void game(SDL_Renderer*& renderer, int& IsSound, int& IsMusic)
 		{
 			PointDoodle = { platforms[1].RectPlat.x, platforms[1].RectPlat.y, 80, 80 }; m++;
 		}
-		if (y > 580)
+		if (y > 590)
 		{
 			if (IsSound % 2 == 0)
 			{
@@ -831,47 +864,178 @@ void game(SDL_Renderer*& renderer, int& IsSound, int& IsMusic)
 
 		if (y < h)
 		{
-			for (int i = 0; i < 10; ++i)
+			for (int i = 0; i <n; ++i)
 			{
 				y = h;
 				platforms[i].RectPlat.y = platforms[i].RectPlat.y - dy;
 
-				if (platforms[i].RectPlat.y > 533)
+				if (platforms[i].RectPlat.y > 580)
 				{
-					do
-					{
-						int RandDiv = getrandom(2,9);
-						if (i % RandDiv == 0)
-						{
-							RandDiv = getrandom(0, WHITE);
-							platforms[i].type = platform_t( getrandom(0, WHITE));
-							SetUpPlat(renderer, platforms[i]);
+					
+						int IsBonus = getrandom(0, 100);
+						int IsMonster = getrandom(0, 100);
+						
+						
+							cout << "IsBonus" << IsBonus<< endl;
 
-						}
-						platforms[i].RectPlat.y = rand() % (50);
-						platforms[i].RectPlat.x = rand() % 800 - 90;
-					} while (is_intersection_platform(platforms[i].RectPlat, platforms, n));
+							if (IsBonus <= 2)
+							{
+								platforms[i].type = platform_t(GreenWithJump);
+								SetUpPlat(renderer, platforms[i]);
+								do
+								{
+									platforms[i].RectPlat.y = getrandom(10, 60);
+									platforms[i].RectPlat.x = getrandom(90, 720);
+									platforms[i].RectPlat.w = 90;
+									platforms[i].RectPlat.h = 30;
+								} while (is_intersection_platform(platforms[i].RectPlat, platforms, n));
+									
+							}
+							else
+							{
+	
+									if(IsBonus == 3)
+									{
+										platforms[i].type = platform_t(GreenWithJetpack);
+										SetUpPlat(renderer, platforms[i]);
+										do
+										{
+											platforms[i].RectPlat.y = getrandom(10, 60);
+											platforms[i].RectPlat.x = getrandom(90, 720);
+											platforms[i].RectPlat.w = 90;
+											platforms[i].RectPlat.h = 30;
+										} while (is_intersection_platform(platforms[i].RectPlat, platforms, n));
+										
+									}
+									if(IsBonus >= 4)
+									{
+							
+											int RandDiv = getrandom(2, 9);
+											
+												
+												RandDiv = getrandom(0, WHITE);
+												platforms[i].type = platform_t(getrandom(0, WHITE));
+												SetUpPlat(renderer, platforms[i]);
+											
+											do
+											{
+												platforms[i].RectPlat.y = getrandom(10, 60);
+												platforms[i].RectPlat.x = getrandom(90, 720);
+												platforms[i].RectPlat.w = 90;
+												platforms[i].RectPlat.h = 15;
+											} while (is_intersection_platform(platforms[i].RectPlat, platforms, n));
+									}
+								
+							}
+						
+					
 				}
 			}
 		}
 
+			
+				for (int i = 0; i < n; i++) 
+				{
+					if (platforms[i].type == BLUE)
+					{
+						
+						int platformY = platforms[i].RectPlat.y;
+						 platformY += platformDirection1 * platformOffset;
+
+						 platforms[i].RectPlat.y = platformY;
+						 if ((platforms[i].RectPlat.y < 50) || (platforms[i].RectPlat.y > 500) )
+						 {
+							 
+							 platformDirection1 *= -1;
+						 }
+						 
+					}
+				}
+
+				for (int i = 0; i < n; i++)
+				{
+					if (platforms[i].type == DARK_BLUE)
+					{
+						
+						int platformX = platforms[i].RectPlat.x;
+						platformX += platformDirection2 * platformOffset;
+						
+						platforms[i].RectPlat.x = platformX;
+						if (platforms[i].RectPlat.x > 720 || platforms[i].RectPlat.x < 40)
+						{
+							
+							platformDirection2 *= -1;
+						}
+						
+					}
+				}
+			
+		
+
 		
 		
 
-		for (int i = 0; i < 10; i++)
+		for (int i = 0; i < n; i++)
 		{
 			if (is_colliding(PointDoodle, platforms[i].RectPlat) && dy > 0)
 			{
 				if (temp != platforms[i].RectPlat.y && b != i)
 				{
+					if (platforms[i].type == BROKEN)
+					{
+						platforms[i].RectPlat = { 0 , 0 ,0 ,0 };
+					}
+					if (platforms[i].type == GreenWithJump)
+					{
+						isjump = true;
+						jump_speed = -40;
+						b = i;
+						temp = platforms[i].RectPlat.y;
+						k+=5;
+						if (IsSound % 2 == 0)
+						{
+							Mix_Chunk* fireMusic = Mix_LoadWAV("MusicForSpring.wav");
+							Mix_PlayChannel(-1, fireMusic, 0);
+						}
+						
 
-					isjump = true;
-					b = i;
-					temp = platforms[i].RectPlat.y;
-					k++;
+					}
+
+					if (platforms[i].type == GreenWithJetpack)
+					{
+						isjetpack = true;
+						isjump = true;
+						jump_speed = -200;
+						b = i;
+						temp = platforms[i].RectPlat.y;
+						k += 20;
+						if (IsSound % 2 == 0)
+						{
+							Mix_Chunk* fireMusic = Mix_LoadWAV("MusicForJetpack.wav");
+							Mix_PlayChannel(-1, fireMusic, 0);
+						}
+
+
+					}
+					if(platforms[i].type == GREEN || platforms[i].type == DARK_BLUE || platforms[i].type == BLUE)
+					{
+						isjump = true;
+						b = i;
+						temp = platforms[i].RectPlat.y;
+						k++;
+						
+					}
+
+					if (platforms[i].type == WHITE)
+					{
+						isjump = true;
+						platforms[i].RectPlat = { 0 , 0 ,0 ,0 };
+						k++;
+						
+					}
 				}
+				if(platforms[i].type == GreenWithJetpack|| platforms[i].type == GreenWithJump || platforms[i].type == GREEN || platforms[i].type == WHITE || platforms[i].type == DARK_BLUE|| platforms[i].type == BLUE) dy = jump_speed;
 				
-				dy = jump_speed;
 				SDL_Delay(3);
 				
 				if (IsSound % 2 == 0) 
@@ -890,7 +1054,7 @@ void game(SDL_Renderer*& renderer, int& IsSound, int& IsMusic)
 		SDL_RenderCopy(renderer, TextureForFon, NULL, &FullScreen);
 		SDL_RenderCopy(renderer, TextureSky, NULL, &RectForSky);
 		SDL_RenderCopy(renderer, TextureButtonPause, NULL, &RectForButtonPause);
-		draw_platforms(renderer, platforms, 10);
+		draw_platforms(renderer, platforms, n);
 		if (side)
 		{
 			if (isattack)
@@ -911,12 +1075,14 @@ void game(SDL_Renderer*& renderer, int& IsSound, int& IsMusic)
 					SDL_RenderClear(renderer);
 					RectBallAttack.y -= 5;
 					SDL_RenderCopy(renderer, TextureForFon, NULL, &FullScreen);
+					SDL_RenderCopy(renderer, TextureSky, NULL, &RectForSky);
+					SDL_RenderCopy(renderer, TextureButtonPause, NULL, &RectForButtonPause);
 					SDL_RenderCopy(renderer, TextureDoodleAttack, NULL, &PointDoodle);
 					RectBallAttack.w = 20;
 					RectBallAttack.h = 20;
 					RectBallAttack.x = PointDoodle.x + 20;
 					SDL_RenderCopy(renderer, TextureBallForAttack, NULL, &RectBallAttack);
-					draw_platforms(renderer, platforms, 10);
+					draw_platforms(renderer, platforms, n);
 					Score = get_text_texture(renderer, text, my_font);
 					draw_text(renderer, Score);
 					SDL_DestroyTexture(Score);
@@ -961,12 +1127,14 @@ void game(SDL_Renderer*& renderer, int& IsSound, int& IsMusic)
 					SDL_RenderClear(renderer);
 					RectBallAttack.y -= 5;
 					SDL_RenderCopy(renderer, TextureForFon, NULL, &FullScreen);
+					SDL_RenderCopy(renderer, TextureSky, NULL, &RectForSky);
+					SDL_RenderCopy(renderer, TextureButtonPause, NULL, &RectForButtonPause);
 					SDL_RenderCopy(renderer, TextureDoodleAttack, NULL, &PointDoodle);
 					RectBallAttack.w = 20;
 					RectBallAttack.h = 20;
 					RectBallAttack.x = PointDoodle.x + 20;
 					SDL_RenderCopy(renderer, TextureBallForAttack, NULL, &RectBallAttack);
-					draw_platforms(renderer, platforms, 10);
+					draw_platforms(renderer, platforms, n);
 					Score = get_text_texture(renderer, text, my_font);
 					draw_text(renderer, Score);
 					SDL_DestroyTexture(Score);
@@ -999,7 +1167,7 @@ void game(SDL_Renderer*& renderer, int& IsSound, int& IsMusic)
 		draw_text(renderer, Score);
 		SDL_DestroyTexture(Score);
 		SDL_RenderPresent(renderer);
-		SDL_Delay(5);
+		SDL_Delay(10);
 		SDL_RenderClear(renderer);
 	}
 	FILE* records_read_file = fopen("records.txt", "r");
@@ -1018,7 +1186,7 @@ void game(SDL_Renderer*& renderer, int& IsSound, int& IsMusic)
 			}
 			int intscore = atoi(score);
 			if (intscore > records[kNumRecords].score) {
-				// This is one of the best records.
+				
 				Record new_record;
 				new_record.score = intscore;
 				sscanf(line + i + 2, "%s", new_record.name);
