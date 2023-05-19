@@ -1051,10 +1051,10 @@ void game(SDL_Renderer*& renderer, int& IsSound, int& IsMusic)
 					{
 						isshapka = true;
 						isjump = true;
-						jump_speed = -100;
+						jump_speed = -120;
 						b = i;
 						temp = platforms[i].RectPlat.y;
-						k+=13;
+						k+=15;
 						if (IsSound % 2 == 0)
 						{
 							Mix_Chunk* fireMusic = Mix_LoadWAV("MusicForShapka.wav");
@@ -1067,15 +1067,12 @@ void game(SDL_Renderer*& renderer, int& IsSound, int& IsMusic)
 						jump_speed = -40;
 						b = i;
 						temp = platforms[i].RectPlat.y;
-						k+=5;
+						k+=7;
 						if (IsSound % 2 == 0)
 						{
 							Mix_Chunk* fireMusic = Mix_LoadWAV("MusicForSpring.wav");
 							Mix_PlayChannel(-1, fireMusic, 0);
-							while (Mix_Playing(-1)) {
-								// Выводим "ccc"
-								printf("ccc\n");
-							}
+							
 						}
 					}
 
@@ -1083,10 +1080,10 @@ void game(SDL_Renderer*& renderer, int& IsSound, int& IsMusic)
 					{
 						isjetpack = true;
 						isjump = true;
-						jump_speed = -200;
+						jump_speed = -220;
 						b = i;
 						temp = platforms[i].RectPlat.y;
-						k += 20;
+						k += 30;
 						if (IsSound % 2 == 0)
 						{
 							Mix_Chunk* fireMusic = Mix_LoadWAV("MusicForJetpack.wav");
@@ -1147,152 +1144,168 @@ void game(SDL_Renderer*& renderer, int& IsSound, int& IsMusic)
 		SDL_RenderCopy(renderer, TextureButtonPause, NULL, &RectForButtonPause);
 		draw_platforms(renderer, platforms, n);
 		if (side)
-		{
-			if (isattack)
+		{ 
+			if (Mix_Playing(-1) && isjetpack && side)
 			{
-				SDL_RenderCopy(renderer, TextureDoodleAttack, NULL, &PointDoodle);
-
-
-				RectBallAttack = PointDoodle;
-
-				if (IsSound % 2 == 0)
-				{
-					Mix_Chunk* fireMusic = Mix_LoadWAV("MusicForAttack.wav");
-					Mix_PlayChannel(-1, fireMusic, 0);
-				}
-				while (RectBallAttack.y >= 10)
-				{
-
-					SDL_RenderClear(renderer);
-					RectBallAttack.y -= 5;
-					SDL_RenderCopy(renderer, TextureForFon, NULL, &FullScreen);
-					SDL_RenderCopy(renderer, TextureSky, NULL, &RectForSky);
-					SDL_RenderCopy(renderer, TextureButtonPause, NULL, &RectForButtonPause);
-					SDL_RenderCopy(renderer, TextureDoodleAttack, NULL, &PointDoodle);
-					RectBallAttack.w = 20;
-					RectBallAttack.h = 20;
-					RectBallAttack.x = PointDoodle.x + 20;
-					SDL_RenderCopy(renderer, TextureBallForAttack, NULL, &RectBallAttack);
-					draw_platforms(renderer, platforms, n);
-					for (int i = 0; i < n; i++)
-					{
-						if (platforms[i].type == Monster1 && SDL_HasIntersection(&RectBallAttack,&platforms[i].RectPlat))
-						{
-
-							platforms[i].RectPlat = { 0 , 0 ,0 ,0 };
-							k += 3;
-
-						}
-					}
-					Score = get_text_texture(renderer, text, my_font);
-					draw_text(renderer, Score);
-					SDL_DestroyTexture(Score);
-					SDL_RenderPresent(renderer);
-					
-				}
-
-
-
+				SDL_RenderCopy(renderer, TextureDoodleLookRightWithJetpack, NULL, &PointDoodle);
 			}
 			else
 			{
-				if (isjump)
+				isjetpack = false;
+				if (Mix_Playing(-1) && isshapka && side)
 				{
-					SDL_RenderCopy(renderer, TextureDoodleRightInJump, NULL, &PointDoodle);
-					SDL_RenderPresent(renderer);
+					SDL_RenderCopy(renderer, TextureDoodleLookRightWithShapka, NULL, &PointDoodle);
 				}
-				else {
+				else
+				{
+					isshapka = false;
+					if (isattack)
+					{
+						SDL_RenderCopy(renderer, TextureDoodleAttack, NULL, &PointDoodle);
 
 
-					SDL_RenderCopy(renderer, TextureDoodleRight, NULL, &PointDoodle);
+						RectBallAttack = PointDoodle;
+
+						if (IsSound % 2 == 0)
+						{
+							Mix_Chunk* fireMusic = Mix_LoadWAV("MusicForAttack.wav");
+							Mix_PlayChannel(-1, fireMusic, 0);
+						}
+						while (RectBallAttack.y >= 10)
+						{
+
+							SDL_RenderClear(renderer);
+							RectBallAttack.y -= 5;
+							SDL_RenderCopy(renderer, TextureForFon, NULL, &FullScreen);
+							SDL_RenderCopy(renderer, TextureSky, NULL, &RectForSky);
+							SDL_RenderCopy(renderer, TextureButtonPause, NULL, &RectForButtonPause);
+							SDL_RenderCopy(renderer, TextureDoodleAttack, NULL, &PointDoodle);
+							RectBallAttack.w = 20;
+							RectBallAttack.h = 20;
+							RectBallAttack.x = PointDoodle.x + 20;
+							SDL_RenderCopy(renderer, TextureBallForAttack, NULL, &RectBallAttack);
+							draw_platforms(renderer, platforms, n);
+							for (int i = 0; i < n; i++)
+							{
+								if (platforms[i].type == Monster1 && SDL_HasIntersection(&RectBallAttack, &platforms[i].RectPlat))
+								{
+
+									platforms[i].RectPlat = { 0 , 0 ,0 ,0 };
+									k += 3;
+
+								}
+							}
+							Score = get_text_texture(renderer, text, my_font);
+							draw_text(renderer, Score);
+							SDL_DestroyTexture(Score);
+							SDL_RenderPresent(renderer);
+
+						}
+
+
+
+					}
+					else
+					{
+						if (isjump)
+						{
+							SDL_RenderCopy(renderer, TextureDoodleRightInJump, NULL, &PointDoodle);
+							SDL_RenderPresent(renderer);
+						}
+						else {
+
+
+							SDL_RenderCopy(renderer, TextureDoodleRight, NULL, &PointDoodle);
+						}
+					}
 				}
 			}
 		}
 
 		else
 		{
-			if (isattack)
+			if (Mix_Playing(-1) && isjetpack && !side)
 			{
-				SDL_RenderCopy(renderer, TextureDoodleAttack, NULL, &PointDoodle);
-
-
-				RectBallAttack = PointDoodle;
-
-				if (IsSound % 2 == 0)
-				{
-					Mix_Chunk* fireMusic = Mix_LoadWAV("MusicForAttack.wav");
-					Mix_PlayChannel(-1, fireMusic, 0);
-				}
-				while (RectBallAttack.y >= 10)
-				{
-					SDL_RenderClear(renderer);
-					RectBallAttack.y -= 5;
-					SDL_RenderCopy(renderer, TextureForFon, NULL, &FullScreen);
-					SDL_RenderCopy(renderer, TextureSky, NULL, &RectForSky);
-					SDL_RenderCopy(renderer, TextureButtonPause, NULL, &RectForButtonPause);
-					SDL_RenderCopy(renderer, TextureDoodleAttack, NULL, &PointDoodle);
-					RectBallAttack.w = 20;
-					RectBallAttack.h = 20;
-					RectBallAttack.x = PointDoodle.x + 20;
-					SDL_RenderCopy(renderer, TextureBallForAttack, NULL, &RectBallAttack);
-					draw_platforms(renderer, platforms, n);
-					for (int i = 0; i < n; i++)
-					{
-						if (platforms[i].type == Monster1 && SDL_HasIntersection(&RectBallAttack, &platforms[i].RectPlat))
-						{
-
-							platforms[i].RectPlat = { 0 , 0 ,0 ,0 };
-							k += 3;
-
-						}
-					}
-					Score = get_text_texture(renderer, text, my_font);
-					draw_text(renderer, Score);
-					SDL_DestroyTexture(Score);
-					SDL_RenderPresent(renderer);
-					
-
-				}
-
-
+				SDL_RenderCopy(renderer, TextureDoodleLookLeftWithJetpack, NULL, &PointDoodle);
 			}
 			else
 			{
-				if (isjump)
+				isjetpack = false;
+				if (Mix_Playing(-1) && isshapka && !side)
 				{
-					SDL_RenderCopy(renderer, TextureDoodleLeftInJump, NULL, &PointDoodle);
-					SDL_RenderPresent(renderer);
-					SDL_Delay(50);
+					SDL_RenderCopy(renderer, TextureDoodleLookLeftWithShapka, NULL, &PointDoodle);
 				}
-				else {
+				else
+				{
+					isshapka = false;
+					if (isattack)
+					{
+						SDL_RenderCopy(renderer, TextureDoodleAttack, NULL, &PointDoodle);
 
-					SDL_RenderCopy(renderer, TextureDoodleLeft, NULL, &PointDoodle);
 
+						RectBallAttack = PointDoodle;
+
+						if (IsSound % 2 == 0)
+						{
+							Mix_Chunk* fireMusic = Mix_LoadWAV("MusicForAttack.wav");
+							Mix_PlayChannel(-1, fireMusic, 0);
+						}
+						while (RectBallAttack.y >= 10)
+						{
+							SDL_RenderClear(renderer);
+							RectBallAttack.y -= 5;
+							SDL_RenderCopy(renderer, TextureForFon, NULL, &FullScreen);
+							SDL_RenderCopy(renderer, TextureSky, NULL, &RectForSky);
+							SDL_RenderCopy(renderer, TextureButtonPause, NULL, &RectForButtonPause);
+							SDL_RenderCopy(renderer, TextureDoodleAttack, NULL, &PointDoodle);
+							RectBallAttack.w = 20;
+							RectBallAttack.h = 20;
+							RectBallAttack.x = PointDoodle.x + 20;
+							SDL_RenderCopy(renderer, TextureBallForAttack, NULL, &RectBallAttack);
+							draw_platforms(renderer, platforms, n);
+							for (int i = 0; i < n; i++)
+							{
+								if (platforms[i].type == Monster1 && SDL_HasIntersection(&RectBallAttack, &platforms[i].RectPlat))
+								{
+
+									platforms[i].RectPlat = { 0 , 0 ,0 ,0 };
+									k += 3;
+
+								}
+							}
+							Score = get_text_texture(renderer, text, my_font);
+							draw_text(renderer, Score);
+							SDL_DestroyTexture(Score);
+							SDL_RenderPresent(renderer);
+
+
+						}
+
+
+					}
+					else
+					{
+						if (isjump)
+						{
+							SDL_RenderCopy(renderer, TextureDoodleLeftInJump, NULL, &PointDoodle);
+							SDL_RenderPresent(renderer);
+							SDL_Delay(50);
+						}
+						else {
+
+							SDL_RenderCopy(renderer, TextureDoodleLeft, NULL, &PointDoodle);
+
+						}
+					}
 				}
 			}
 
-
 		}
 
-		if (Mix_Playing(-1) && isjetpack && !side)
-		{
-			SDL_RenderCopy(renderer, TextureDoodleLookLeftWithJetpack, NULL, &PointDoodle);
-		}
-		if (Mix_Playing(-1) && isjetpack && side)
-		{
-			SDL_RenderCopy(renderer, TextureDoodleLookRightWithJetpack, NULL, &PointDoodle);
-		}
+		
 
 
-		if (Mix_Playing(-1) && isshapka && !side)
-		{
-			SDL_RenderCopy(renderer, TextureDoodleLookLeftWithShapka, NULL, &PointDoodle);
-		}
-		if (Mix_Playing(-1) && isshapka && side)
-		{
-			SDL_RenderCopy(renderer, TextureDoodleLookRightWithShapka, NULL, &PointDoodle);
-		}
-	
+		
 
 
 		_itoa_s(k, text, 10);
