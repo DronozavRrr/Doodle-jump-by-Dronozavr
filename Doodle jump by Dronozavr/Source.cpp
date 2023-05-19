@@ -621,13 +621,13 @@ bool MainMenu(SDL_Renderer*& renderer, int& IsSound, int& IsMusic)
 
 				if (SDL_HasIntersection(&nowmouse, &ForButtonExit)) return 0;
 			}
-			if ((event.type == SDL_KEYDOWN) && (event.key.keysym.sym == SDLK_w))
+			if ((event.type == SDL_KEYDOWN) && (event.key.keysym.sym == SDLK_w || event.key.keysym.sym == SDLK_UP))
 			{
 				if (y_for_line != 100) y_for_line -= 120;
 				else y_for_line = 460;
 
 			}
-			if ((event.type == SDL_KEYDOWN) && (event.key.keysym.sym == SDLK_s))
+			if ((event.type == SDL_KEYDOWN) && (event.key.keysym.sym == SDLK_s || event.key.keysym.sym == SDLK_DOWN))
 			{
 				if (y_for_line != 460) y_for_line += 120;
 				else y_for_line = 100;
@@ -854,13 +854,13 @@ void game(SDL_Renderer*& renderer, int& IsSound, int& IsMusic)
 		{
 			if (event.type == SDL_QUIT)
 				quit = true;
-			if ((event.type == SDL_KEYDOWN) && (event.key.keysym.sym == SDLK_d))
+			if ((event.type == SDL_KEYDOWN) && (event.key.keysym.sym == SDLK_d || event.key.keysym.sym == SDLK_RIGHT))
 			{
 				x += 20;
 				side = true;
 
 			}
-			if ((event.type == SDL_KEYDOWN) && (event.key.keysym.sym == SDLK_a))
+			if ((event.type == SDL_KEYDOWN) && (event.key.keysym.sym == SDLK_a || event.key.keysym.sym == SDLK_LEFT))
 			{
 				x -= 20;
 				side = false;
